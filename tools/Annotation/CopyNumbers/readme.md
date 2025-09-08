@@ -53,7 +53,7 @@ genename	id	type	total_size	total_exons	aggregate_copy_number	alleles
 - `total_size`: Total length of the MANE transcript
 - `total_exons`: Number of exons
 - `aggregate_copy_number`: Sum of overlap-normalized similarity
-- `alleles`: List of supporting alleles and exon ranges
+- `alleles`: List of pangenome alleles names, their exon ranges and reference alignment similarity. 
 
 ---
 
