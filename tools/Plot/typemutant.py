@@ -196,7 +196,7 @@ def adjust_lightness(color, amount=0.5):
 
 def segfiltration(cigar, usednames = ""):
 	
-	cigars = re.findall('[<>][0-9_A-Za-z:]+',cigar)
+	cigars = re.findall('[<>][0-9_A-Za-z:=]+',cigar)
 	
 	newcigars = []
 	for cigarstr in cigars:
@@ -391,7 +391,7 @@ def plotexons(fig, ax, lelement, inputfile, gff3file, used_cigars):
 
 def segfiltration(cigar, usednames = ""):
 	
-	cigars = re.findall('[<>][0-9_A-Za-z:]+',cigar)
+	cigars = re.findall('[<>][0-9_A-Za-z:=]+',cigar)
 	
 	newcigars = []
 	for cigarstr in cigars:
@@ -417,8 +417,7 @@ def segfiltration(cigar, usednames = ""):
 
 def getsegments(cigarstr,highlight,exons,ifmask = 0):
 	
-	cigars = re.findall(r'[><0-9_:]*\d+[=A-Za-z]+', cigarstr)
-	
+	cigars = re.findall(r'[><0-9_:]*\d+[=A-Za-z]+', cigarstr)	
 	
 	variants = []
 	segments = []
@@ -435,13 +434,11 @@ def getsegments(cigarstr,highlight,exons,ifmask = 0):
 	coordinate = 0
 	laststart = 0
 	findposition = -1
-	
 	for cigar in  cigars:
 		
 		if ":" in cigar:
 			
 			localpath_offsite = coordinate
-			
 			name,cigar = cigar.split(":")
 			
 			name = name[1:]
@@ -706,31 +703,47 @@ def loadannofile(inputfile, genename=""):
 		open_func = lambda f: gzip.open(f, mode='rt')
 	else:
 		open_func = open
-		
-	with open(inputfile) as f:
-		for line in f:
-			
-			if len(line.strip()) == 0 or line.startswith("#"):
-				continue
-			
-			if genename and not line.startswith(genename):
-				continue
-			fields = line.rstrip('\n').split('\t')
-			if len(fields) < 18:
-				continue  # skip malformed lines
-			name = fields[0]
-			thetype = fields[1]
-			cigar = fields[17]
-			type_int = int(thetype.split("_")[2])
-			names.append(name)
-			cigars.append(cigar)
-			types[name] = type_int
-			
+	
+	if not inputfile.endswith(".gaf"):
+		with open(inputfile) as f:
+			for line in f:
+				
+				if len(line.strip()) == 0 or line.startswith("#"):
+					continue
+				
+				if genename and not line.startswith(genename):
+					continue
+				fields = line.rstrip('\n').split('\t')
+				if len(fields) < 18:
+					continue  # skip malformed lines
+				name = fields[0]
+				thetype = fields[1]
+				cigar = fields[17]
+				type_int = int(thetype.split("_")[2])
+				names.append(name)
+				cigars.append(cigar)
+				types[name] = type_int
+	else:
+		with open(inputfile) as f:
+			for line in f:
+				if not line.startswith('L') or len(line.strip()) == 0 or line.startswith("#"):
+					continue
+				
+				fields = line.rstrip('\n').split('\t')
+				
+				name = fields[1]
+				cigar = fields[5]
+				type_int = 0
+				names.append(name)
+				cigars.append(cigar)
+				types[name] = type_int
+	
 	return names, cigars, types
 
 
 
 def selectcigar(names,cigars,types):
+		
 	
 	used_cigars = dict()
 	for i,(name,cigar) in enumerate(zip(names,cigars)):
@@ -821,7 +834,7 @@ def makemutant(inputfile, outputfile, annotation, hnames=None, gff3file = "" ,if
 	highlight = {}
 	
 	names, cigars, types = loadannofile(annotation, genename)
-	
+
 	used_cigars = selectcigar(names,cigars,types)
 	
 	segment_orders = segment_order(cigars,used_cigars)
@@ -834,6 +847,8 @@ def makemutant(inputfile, outputfile, annotation, hnames=None, gff3file = "" ,if
 		highlightnames = [x for x in hnames.split(",") if len(x)]
 	elif len(inputfile):
 		highlightnames = extract_names(inputfile, genename)
+	else:
+		highlightnames = []
 		
 	fig,ax, offsite = plotmutant(alltypes,elements,highlightnames,fullsize)
 	
@@ -860,7 +875,7 @@ def run():
 	parser.add_argument("-i", "--input", help="path to input data file",dest="input", type=str, default = "")
 	parser.add_argument("-a", "--anno", help="path to annotation dababase file",dest="anno", type=str, required=True)
 	parser.add_argument("-o", "--output", help="path to output file", dest="output",type=str, required=True)
-	parser.add_argument("-g", "--gene", help="name of the plotting gene or gene group", dest="gene",type=str, required=True)
+	parser.add_argument("-g", "--gene", help="name of the plotting gene or gene group", dest="gene",type=str, default = "")
 	parser.add_argument("-n", "--name", help="highlight names, separate by comma, or input the ctyper genotyping results/annotation table file", dest="name",type=str, default = "")
 	parser.add_argument("-intron", "--intron", help="if plot intron duplications", dest="intron",type=int, default = 0)
 	parser.add_argument("-mask", "--mask", help="if hidden variants in masked region", dest="mask",type=int, default = 0)
