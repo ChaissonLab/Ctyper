@@ -196,7 +196,7 @@ def adjust_lightness(color, amount=0.5):
 
 def segfiltration(cigar, usednames = ""):
 	
-	cigars = re.findall('[<>][0-9_A-Za-z:]+',cigar)
+	cigars = re.findall('[<>][0-9_A-Za-z:=]+',cigar)
 	
 	newcigars = []
 	for cigarstr in cigars:
@@ -237,26 +237,28 @@ def getgenelocation(table, gff3file, used_cigars):
 					
 		gffrecords = {thechr:{gene:overlapexons(coordi) for gene, coordi in record.items()} for thechr, record in gffrecord.items()}
 		
-		for row in table.values.tolist():
+		for row in table:
 			
-			locus = row[7]
+			locus, thepath, cigar = row
+			
+			#locus = row[7]
 			refchr = locus.split(":")[0]
 			if refchr not in gffrecords:
 				continue
 			
 			strd = locus[-1]
 			
-			thepath = row[-3]
+			#thepath = row[-3]
 			
-			cigar = row[-2]
-			segment_cigars = re.findall('[<>][0-9_A-Za-z:]+',cigar)
-			segment_orders = re.findall('[<>][0-9_A-Za-z:]+',thepath)
+			#cigar = row[-2]
+			
+			segment_cigars = re.findall('[<>][0-9_A-Za-z=:]+',cigar)
+			segment_orders = re.findall('[<>][0-9_A-Za-z=:]+',thepath)
 			
 			segment_cigars = {x.split(":")[0][1:]:x for x in segment_cigars if x.split(":")[0][1:].split("_")[0] in used_cigars}
 			segment_orders = [x for x in segment_orders if x[1:].split("_")[0] in used_cigars]
 			
 			segment_cigars = [segment_cigars[x[1:]] for x in segment_orders]
-			
 			segment_alignsizes = [(x.split(":")[0], getcigarsize(x.split(":")[1])) for x in segment_cigars ]
 			
 			qcoordi = 0
@@ -278,11 +280,12 @@ def getgenelocation(table, gff3file, used_cigars):
 				if len(exons) == 0:
 					continue
 				
+				
 				if strd == '+' :
 					exons = sum([ [ max(0, x[0] - start), x[1] - start ] for x in exons],[])
 				else:
 					exons = sum([ [ max(0, end - 1 - x[1]), end - x[0] ] for x in exons[::-1]],[])
-					
+				
 				exons_onsegments = maptoseg(exons, segment_qranges)
 				
 				
@@ -313,12 +316,9 @@ def getgenelocation(table, gff3file, used_cigars):
 	return segment_exonalign
 
 
-def plotexons(fig, ax, lelement, inputfile, gff3file, used_cigars):
+def plotexons(fig, ax, lelement, gff3file, used_cigars, table):
 	
-	table = pd.read_csv(inputfile, sep = '\t', header = None)
-	
-	row0 = table.values.tolist()[0]
-	segment_cigars = re.findall('[<>][0-9_A-Za-z:]+',row0[-2])
+	segment_cigars = re.findall('[<>][0-9_A-Za-z:]+',table[0][-1])
 	
 	segment_order = []
 	for segment_cigar in segment_cigars:
@@ -391,7 +391,7 @@ def plotexons(fig, ax, lelement, inputfile, gff3file, used_cigars):
 
 def segfiltration(cigar, usednames = ""):
 	
-	cigars = re.findall('[<>][0-9_A-Za-z:]+',cigar)
+	cigars = re.findall('[<>][0-9_A-Za-z:=]+',cigar)
 	
 	newcigars = []
 	for cigarstr in cigars:
@@ -417,8 +417,7 @@ def segfiltration(cigar, usednames = ""):
 
 def getsegments(cigarstr,highlight,exons,ifmask = 0):
 	
-	cigars = re.findall(r'[><0-9_:]*\d+[=A-Za-z]+', cigarstr)
-	
+	cigars = re.findall(r'[><0-9_:]*\d+[=A-Za-z]+', cigarstr)	
 	
 	variants = []
 	segments = []
@@ -435,13 +434,11 @@ def getsegments(cigarstr,highlight,exons,ifmask = 0):
 	coordinate = 0
 	laststart = 0
 	findposition = -1
-	
 	for cigar in  cigars:
 		
 		if ":" in cigar:
 			
 			localpath_offsite = coordinate
-			
 			name,cigar = cigar.split(":")
 			
 			name = name[1:]
@@ -706,31 +703,47 @@ def loadannofile(inputfile, genename=""):
 		open_func = lambda f: gzip.open(f, mode='rt')
 	else:
 		open_func = open
-		
-	with open(inputfile) as f:
-		for line in f:
-			
-			if len(line.strip()) == 0 or line.startswith("#"):
-				continue
-			
-			if genename and not line.startswith(genename):
-				continue
-			fields = line.rstrip('\n').split('\t')
-			if len(fields) < 18:
-				continue  # skip malformed lines
-			name = fields[0]
-			thetype = fields[1]
-			cigar = fields[17]
-			type_int = int(thetype.split("_")[2])
-			names.append(name)
-			cigars.append(cigar)
-			types[name] = type_int
-			
+	
+	if not inputfile.endswith(".gaf"):
+		with open(inputfile) as f:
+			for line in f:
+				
+				if len(line.strip()) == 0 or line.startswith("#"):
+					continue
+				
+				if genename and not line.startswith(genename):
+					continue
+				fields = line.rstrip('\n').split('\t')
+				if len(fields) < 18:
+					continue  # skip malformed lines
+				name = fields[0]
+				thetype = fields[1]
+				cigar = fields[17]
+				type_int = int(thetype.split("_")[2])
+				names.append(name)
+				cigars.append(cigar)
+				types[name] = type_int
+	else:
+		with open(inputfile) as f:
+			for line in f:
+				if not line.startswith('L') or len(line.strip()) == 0 or line.startswith("#"):
+					continue
+				
+				fields = line.rstrip('\n').split('\t')
+				
+				name = fields[1]
+				cigar = fields[5]
+				type_int = 0
+				names.append(name)
+				cigars.append(cigar)
+				types[name] = type_int
+	
 	return names, cigars, types
 
 
 
 def selectcigar(names,cigars,types):
+		
 	
 	used_cigars = dict()
 	for i,(name,cigar) in enumerate(zip(names,cigars)):
@@ -815,13 +828,24 @@ def extract_names(inputfile, genename):
 	return output
 
 
-def makemutant(inputfile, outputfile, annotation, hnames=None, gff3file = "" ,ifintron = 1, ifmask = 0, genename = ""):
+def makemutant(inputfile, outputfile, annotation, typefile = "", hnames=None, gff3file = "" ,ifintron = 1, ifmask = 0, genename = "", reflocus = ""):
 	
 	exons = {}
 	highlight = {}
 	
 	names, cigars, types = loadannofile(annotation, genename)
 	
+	index = 0
+	if len(typefile):
+		with open(typefile, mode = 'r' ) as f:
+			for line in f:
+				if len(line.strip()) == 0:
+					continue
+				index += 1
+				line = line.strip().split()
+				for member in line[-1].split(","):
+					types[member] = index
+
 	used_cigars = selectcigar(names,cigars,types)
 	
 	segment_orders = segment_order(cigars,used_cigars)
@@ -834,15 +858,31 @@ def makemutant(inputfile, outputfile, annotation, hnames=None, gff3file = "" ,if
 		highlightnames = [x for x in hnames.split(",") if len(x)]
 	elif len(inputfile):
 		highlightnames = extract_names(inputfile, genename)
+	else:
+		highlightnames = []
 		
 	fig,ax, offsite = plotmutant(alltypes,elements,highlightnames,fullsize)
 	
 	# Show the plot
 	if len(gff3file):
+	
+		table = []
+		if len(inputfile):
+			table = pd.read_csv(inputfile, sep = '\t', header = None)
+			table = table.values.tolist()
+			table = [[row[7], row[-3], row[-2]] for row in table]
+		if len(reflocus):
+			
+			for reflocus_ in reflocus.split(","):
+			
+				name = reflocus_.split(":")[0]
+				if name in names:
+					locus = ":".join(reflocus_.split(":")[1:])
+					thecigar = cigars[names.index(name)]
+					thepath = "".join([x.split(":")[0] for x in re.findall('[<>][0-9_A-Za-z:=]+',thecigar)])
+					table += [[locus,thepath ,thecigar]]
 		
-		fullfile = inputfile
-		
-		plotexons(fig, ax, offsite , fullfile , gff3file, used_cigars)
+		plotexons(fig, ax, offsite , gff3file, used_cigars, table)
 		
 	plt.axis('off')
 	plt.savefig(outputfile)
@@ -850,7 +890,7 @@ def makemutant(inputfile, outputfile, annotation, hnames=None, gff3file = "" ,if
 	
 def main(args):
 	
-	makemutant(args.input, args.output, args.anno, args.name,  args.gff, args.intron, args.mask, args.gene)
+	makemutant(args.input, args.output, args.anno, args.typefile, args.name, args.gff, args.intron, args.mask, args.gene, args.reflocus)
 	
 def run():
 	"""
@@ -859,13 +899,14 @@ def run():
 	parser = argparse.ArgumentParser(description="program to visualize pangenome-alleles")
 	parser.add_argument("-i", "--input", help="path to input data file",dest="input", type=str, default = "")
 	parser.add_argument("-a", "--anno", help="path to annotation dababase file",dest="anno", type=str, required=True)
+	parser.add_argument("-t", "--type", help="path to annotation type file",dest="typefile", type=str, default = "")
 	parser.add_argument("-o", "--output", help="path to output file", dest="output",type=str, required=True)
-	parser.add_argument("-g", "--gene", help="name of the plotting gene or gene group", dest="gene",type=str, required=True)
+	parser.add_argument("-g", "--gene", help="name of the plotting gene or gene group", dest="gene",type=str, default = "")
 	parser.add_argument("-n", "--name", help="highlight names, separate by comma, or input the ctyper genotyping results/annotation table file", dest="name",type=str, default = "")
 	parser.add_argument("-intron", "--intron", help="if plot intron duplications", dest="intron",type=int, default = 0)
 	parser.add_argument("-mask", "--mask", help="if hidden variants in masked region", dest="mask",type=int, default = 0)
 	parser.add_argument("-G", "--gff", help="path to gff3 file to plot GRCH38 genes", dest="gff",type=str, default = "")
-	
+	parser.add_argument("-r", "--reflocus", help="reference locus and its allele name", dest="reflocus",type=str, default = "")
 	
 	parser.set_defaults(func=main)
 	args = parser.parse_args()

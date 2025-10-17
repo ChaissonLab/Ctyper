@@ -29,7 +29,7 @@
   <p align="center">
     A pangenome allele-specific and copy number specific genotyping tool
     <br />
-    <a href="https://www.biorxiv.org/content/10.1101/2024.08.11.607269v1"><strong>Cite the paper»</strong></a>
+    <a href="https://www.nature.com/articles/s41588-025-02346-4"><strong>Cite the paper»</strong></a>
     <br />
     <br />
     <a href="https://github.com/Walfred-MA/Ctyper/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
@@ -63,6 +63,8 @@
 Ctyper is a versatile genotyping tool designed for copy number-sensitive analysis of NGS (Next-Generation Sequencing) data using a pangenome database. It excels at genotyping complex CNV (copy number variation) and highly polymorphic genes, but can also be used for standard genotyping, local phasing, VNTR and structural variant (SV) calling across other genes.
 
 Ctyper enables rapid genotyping of target genes with state-of-the-art accuracy, often completing each target in seconds, and is fully scalable for biobank-level analyses. Results will be supported in converting to readable tables, FASTA files, VCF files, HLA/KIR/CYP2D6 nomenclatures, and mutation plots for visualization.
+
+Here, Ctyper generally supports the genes in our database (you may find by checking the index file). If you wish to build your own pangenome database to study custom genes or loci not already included in the existing database, or to define regions with different boundaries or sizes, you can use the companion toolkit PATs available at https://github.com/Walfred-MA/PATs/. However, we strongly recommend contacting us before attempting to build your own database.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -379,7 +381,7 @@ To understand the output file, genotype.txt is a tsv table file. Its headers are
 | Column Name     | Description                           |
 |-----------------|---------------------------------------|
 | allele_name       | Unique identifier for the pangenone allele, format is $prefix_$groupindex_$sample_$haplotype_$index   |
-| clade_name        | which clade (type of an allele, alias to HLA nameclature) this pangenone allele belongs to |
+| nameclature_name        | which pangenome based nameclature this pangenone allele belongs to (alias to HLA nameclature)  |
 | transcript      | The exonic DNA it contains, format is $transcript_id:$gene_name:$similarity, if have multiple transcripts, then separated by semicolon, and if only contains a part of transcript, then it would be $transcript_id($start_exon_index-$end_exon_index):$gene_name:$similarity |
 | classfication        | Ref: the alleles very similar to reference genes, Alt: alternative version of reference genes, Dup: duplicated paralogs, Novel: paralogs with novel sequences |
 | pangenome_location | the location of the assembly, format: $sample#$haplotype#$contig:$start-$end$strand |
