@@ -64,6 +64,8 @@ Ctyper is a versatile genotyping tool designed for copy number-sensitive analysi
 
 Ctyper enables rapid genotyping of target genes with state-of-the-art accuracy, often completing each target in seconds, and is fully scalable for biobank-level analyses. Results will be supported in converting to readable tables, FASTA files, VCF files, HLA/KIR/CYP2D6 nomenclatures, and mutation plots for visualization.
 
+Here, Ctyper generally supports the genes in our database (you may find by checking the index file). If you wish to build your own pangenome database to study custom genes or loci not already included in the existing database, or to define regions with different boundaries or sizes, you can use the companion toolkit PATs available at https://github.com/Walfred-MA/PATs/. However, we strongly recommend contacting us before attempting to build your own database.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- Getting Started -->
