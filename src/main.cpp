@@ -83,7 +83,7 @@ void printHelp()
     std::cerr << "  -n, --nthreads <number>      Number of threads to run different samples in parallel, parallel between sample is more efficient for large cohorts, especially when reading files on slower hard drives (default: 1).\n";
     std::cerr << "  -N, --subthreads <number>    Number of threads to run each sample, due to file I/O bottleneck, suggest use only 1-4 on hdd drive, but parallele within sample is memory friendly (default: 1).\n\n";
     
-    std::cerr << "  -d, --depth <value>          Fixed 31-mer depth value (incompatible with -b/--background). IMPORTANT: 31-mer depth = (1 - 30/read_length) × sequencing_depth. For 150 bp reads, this = 0.8 × sequencing_depth.\n";
+    std::cerr << "  -d, --depth <value>          Fixed 31-mer depth value (incompatible with -b/--background). IMPORTANT: 31-mer depth = (1 - 30/read_length) × sequencing_depth. For 150 bp reads, this = 0.4 × sequencing_depth.\n";
     std::cerr << "  -D, --Depth <file>           File of depth values corresponding to each input (incompatible with -b/--background).\n";
     std::cerr << "  -b, --background <file>      Background k-mer file to estimate NGS coverage (incompatible with -d/-D). In target runs, randomly generated 1M regions are used for coverage estimation. Defaults: <matrix>.bgd \n";
 
