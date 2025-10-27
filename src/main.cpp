@@ -69,45 +69,45 @@ void printHelp()
 {
     printHeader();
 
-    std::cerr << "Usage: Ctyper " + string(vctyper) + " [options]\n\n";
-    std::cerr << "Required:\n";
-    std::cerr << "  -m, --matrix <file>          Path to the matrix database (requires <file>.index). If not provided, the tool runs in dry-run mode to only estimate NGS read depth.\n\n";
+    std::cout << "Usage: Ctyper " + string(vctyper) + " [options]\n\n";
+    std::cout << "Required:\n";
+    std::cout << "  -m, --matrix <file>          Path to the matrix database (requires <file>.index). If not provided, the tool runs in dry-run mode to only estimate NGS read depth.\n\n";
 
-    std::cerr << "Options:\n";
-    std::cerr << "  -i, --input <value>          Input NGS file; supports CRAM, BAM, SAM, FASTA, FASTQ, or Jellyfish formats.\n";
-    std::cerr << "  -I, --Inputs <file>          Path to a file listing multiple input files.\n\n";
+    std::cout << "Options:\n";
+    std::cout << "  -i, --input <value>          Input NGS file; supports CRAM, BAM, SAM, FASTA, FASTQ, or Jellyfish formats.\n";
+    std::cout << "  -I, --Inputs <file>          Path to a file listing multiple input files.\n\n";
 
-    std::cerr << "  -o, --output <value>         Output file (append if file exits, default: stdout)\n";
-    std::cerr << "  -O, --Outputs <file>         Path to a file listing output files corresponding to each input file.\n\n";
+    std::cout << "  -o, --output <value>         Output file (append if file exits, default: stdout)\n";
+    std::cout << "  -O, --Outputs <file>         Path to a file listing output files corresponding to each input file.\n\n";
 
-    std::cerr << "  -n, --nthreads <number>      Number of threads to run different samples in parallel, parallel between sample is more efficient for large cohorts, especially when reading files on slower hard drives (default: 1).\n";
-    std::cerr << "  -N, --subthreads <number>    Number of threads to run each sample, due to file I/O bottleneck, suggest use only 1-4 on hdd drive, but parallele within sample is memory friendly (default: 1).\n\n";
+    std::cout << "  -n, --nthreads <number>      Number of threads to run different samples in parallel, parallel between sample is more efficient for large cohorts, especially when reading files on slower hard drives (default: 1).\n";
+    std::cout << "  -N, --subthreads <number>    Number of threads to run each sample, due to file I/O bottleneck, suggest use only 1-4 on hdd drive, but parallele within sample is memory friendly (default: 1).\n\n";
     
-    std::cerr << "  -d, --depth <value>          Fixed 31-mer depth value (incompatible with -b/--background). IMPORTANT: 31-mer depth = (1 - 30/read_length) × sequencing_depth. For 150 bp reads, this = 0.4 × sequencing_depth.\n";
-    std::cerr << "  -D, --Depth <file>           File of depth values corresponding to each input (incompatible with -b/--background).\n";
-    std::cerr << "  -b, --background <file>      Background k-mer file to estimate NGS coverage (incompatible with -d/-D). In target runs, randomly generated 1M regions are used for coverage estimation. Defaults: <matrix>.bgd \n";
+    std::cout << "  -d, --depth <value>          Fixed 31-mer depth value (incompatible with -b/--background). IMPORTANT: 31-mer depth = (1 - 30/read_length) × sequencing_depth. For 150 bp reads, this = 0.4 × sequencing_depth.\n";
+    std::cout << "  -D, --Depth <file>           File of depth values corresponding to each input (incompatible with -b/--background).\n";
+    std::cout << "  -b, --background <file>      Background k-mer file to estimate NGS coverage (incompatible with -d/-D). In target runs, randomly generated 1M regions are used for coverage estimation. Defaults: <matrix>.bgd \n";
 
-    std::cerr << "  -T <ref fasta path>          Reference FASTA for reading CRAM files (default: use REF_CACHE and REF_PATH environment variables).\n";
-    std::cerr << "  -w, --window <number>        Window size for k-mer coverage report (default: 30).\n";
-    std::cerr << "  -c, --corr <0/1>             Enable NGS k-mer bias correction (default: 1).\n";
+    std::cout << "  -T <ref fasta path>          Reference FASTA for reading CRAM files (default: use REF_CACHE and REF_PATH environment variables).\n";
+    std::cout << "  -w, --window <number>        Window size for k-mer coverage report (default: 30).\n";
+    std::cout << "  -c, --corr <0/1>             Enable NGS k-mer bias correction (default: 1).\n";
 
-    std::cerr << "\nTarget run options (for using reads aligned to specific regions or genes, will run all genes in database without specifying):\n\n";
-    std::cerr << "  -g, --gene <name>            Target gene name, prefix (ending with '*', remember to quote escape, e.g., 'HLA*' ), or matrix (starting with '#', e.g., #SMN_group1). Can be specified multiple times.\n";
-    std::cerr << "  -G, --Genes <file>           File listing target genes or matrices.\n\n";
+    std::cout << "\nTarget run options (for using reads aligned to specific regions or genes, will run all genes in database without specifying):\n\n";
+    std::cout << "  -g, --gene <name>            Target gene name, prefix (ending with '*', remember to quote escape, e.g., 'HLA*' ), or matrix (starting with '#', e.g., #SMN_group1). Can be specified multiple times.\n";
+    std::cout << "  -G, --Genes <file>           File listing target genes or matrices.\n\n";
 
-    std::cerr << "  -B <file>                    BED file to restrict region analysis. Make sure its medium name field matches your reference genome md5 values (md5sum $reference). One made from profiling run on EBI/GRCh38_full_analysis_set_plus_decoy_hla.fa is included in https://github.com/Walfred-MA/Ctyper/tree/main/data. With -g/-G, only BED entries with names found in -g/-G are used.\n";
-    std::cerr << "  -r  <chr:start-end>          Add a specific region for analysis. Can be specified multiple times. Regions with be merged if multiple regions provided, can work with -B.\n";
-    std::cerr << "  -r  'gene'                   A special key for -r, add regions from matrix database (must be combined with -g/-G; incompatible with -BED). Less accurate than profiled regions. Not recommend if profile file avaiable or running global mode is possible. No need to add if using a frofiling bedfile \n\n";
-    std::cerr << "  -r  'Unmap'                  A special key for -r, to include all unmap reads. No need to add if using a frofiling bedfile.\n\n";
-    std::cerr << "  -r  'HLA'                    A special key for -r, to include reads on all HLA decoys. No need to add if using a frofiling bedfile. \n\n";
-    std::cerr << "  --unmap <0/1>                Force include:1 or exclude:0 unmapped reads (only valid in target run). More like a debug function and in most cases, no need to specified. No need to add if using a frofiling bedfile \n\n";
+    std::cout << "  -B <file>                    BED file to restrict region analysis. Make sure its medium name field matches your reference genome md5 values (md5sum $reference). One made from profiling run on EBI/GRCh38_full_analysis_set_plus_decoy_hla.fa is included in https://github.com/Walfred-MA/Ctyper/tree/main/data. With -g/-G, only BED entries with names found in -g/-G are used.\n";
+    std::cout << "  -r  <chr:start-end>          Add a specific region for analysis. Can be specified multiple times. Regions with be merged if multiple regions provided, can work with -B.\n";
+    std::cout << "  -r  'gene'                   A special key for -r, add regions from matrix database (must be combined with -g/-G; incompatible with -BED). Less accurate than profiled regions. Not recommend if profile file avaiable or running global mode is possible. No need to add if using a frofiling bedfile \n\n";
+    std::cout << "  -r  'Unmap'                  A special key for -r, to include all unmap reads. No need to add if using a frofiling bedfile.\n\n";
+    std::cout << "  -r  'HLA'                    A special key for -r, to include reads on all HLA decoys. No need to add if using a frofiling bedfile. \n\n";
+    std::cout << "  --unmap <0/1>                Force include:1 or exclude:0 unmapped reads (only valid in target run). More like a debug function and in most cases, no need to specified. No need to add if using a frofiling bedfile \n\n";
 
-    std::cerr << "Target run profiling options (locate mismapped reads and generate BED files for future use):\n";
-    std::cerr << "  -p, --profile <file>         Input aligned NGS file for profiling.\n";
-    std::cerr << "  -P, --Profile <file>         File listing multiple aligned NGS files for profiling. Can be used with both -O and -o; individual results go to -O paths, and a summary is saved to -o.\n\n\n";
+    std::cout << "Target run profiling options (locate mismapped reads and generate BED files for future use):\n";
+    std::cout << "  -p, --profile <file>         Input aligned NGS file for profiling.\n";
+    std::cout << "  -P, --Profile <file>         File listing multiple aligned NGS files for profiling. Can be used with both -O and -o; individual results go to -O paths, and a summary is saved to -o.\n\n\n";
     
-    std::cerr << "Example target mode genotyping command using 16*4 cores on 16 samples to genotype all HLAs:\n  ctyper -B TargetRegions.64b32de2fc934679c16e83a2bc072064.bed -m HprcCpcHgsvc_cmr_matrix.txt -I ./ALL_Input_Paths -O ./ALL_Output_Paths -g 'HLA*' -n 16 -N 4 -T GRCh38_full_analysis_set_plus_decoy_hla.fa 2> log.txt \n";
-    std::cerr  << std::endl;
+    std::cout << "Example target mode genotyping command using 16*4 cores on 16 samples to genotype all HLAs:\n  ctyper -B TargetRegions.64b32de2fc934679c16e83a2bc072064.bed -m HprcCpcHgsvc_cmr_matrix.txt -I ./ALL_Input_Paths -O ./ALL_Output_Paths -g 'HLA*' -n 16 -N 4 -T GRCh38_full_analysis_set_plus_decoy_hla.fa 2> log.txt \n";
+    std::cout  << std::endl;
 }
 
 
