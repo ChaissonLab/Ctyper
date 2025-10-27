@@ -2,7 +2,7 @@ CXX := g++
 SAN := # Default empty. Uncomment and set as needed.
 # SAN := -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -fsanitize=float-divide-by-zero -fsanitize=float-cast-overflow -fno-sanitize=null -fno-sanitize=alignment
 
-BASE_CXXFLAGS := -std=c++17 -O3 -march=haswell -mtune=generic -Wall -Wextra
+BASE_CXXFLAGS := -std=c++17 -O3 -march=native -mtune=generic -Wall -Wextra
 PGO_GENERATE_FLAGS := -fprofile-generate
 PGO_USE_FLAGS := -fprofile-use
 LTO_FLAG := -flto # Separated LTO
