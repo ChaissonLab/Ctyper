@@ -3,8 +3,8 @@ SAN := # Default empty. Uncomment and set as needed.
 # SAN := -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -fsanitize=float-divide-by-zero -fsanitize=float-cast-overflow -fno-sanitize=null -fno-sanitize=alignment
 
 BASE_CXXFLAGS := -std=c++17 -O3 -march=native -mtune=generic -Wall -Wextra
-PGO_GENERATE_FLAGS := -fprofile-generate
-PGO_USE_FLAGS := -fprofile-use
+#PGO_GENERATE_FLAGS := -fprofile-generate
+#PGO_USE_FLAGS := -fprofile-use
 LTO_FLAG := -flto # Separated LTO
 
 INCLUDES := -I$(EIGEN_ROOT)/include/eigen3 -I$(CONDA_PREFIX)/include
@@ -16,7 +16,8 @@ OBJS := $(SRCS:.cpp=.o)
 TARGET := ctyper
 PGO_GEN_EXE := $(TARGET)-pgo-gen
 
-.PHONY: all clean ctyper_pgo_generate ctyper_pgo_use normal clean_objs
+.PHONY: all clean ctyper_pgo_generate ctyper_pgo_use normal 
+	#clean_objs
 
 all: ctyper_pgo_use
 

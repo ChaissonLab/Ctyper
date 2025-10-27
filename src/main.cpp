@@ -146,7 +146,7 @@ int main(int argc, char * argv_[])
     char** argv = &argv_[0];
     if (argc == 1)
     {
-        printHelp();
+	printHelp();
         argv = nullptr;
         Interactive interact(argc, argv);
     }
@@ -158,6 +158,10 @@ int main(int argc, char * argv_[])
         {
             Argument = argv[i];
         }
+	else if (strcmp(Argument, "-h")==0 or strcmp(Argument, "--help") ==0) {
+		printHelp();
+		exit(0);
+	}
         else if (strcmp(Argument, "-i")==0 or strcmp(Argument, "--input")==0)
         {
             inputfiles.push_back(argv[i]);
